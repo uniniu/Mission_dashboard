@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #1a1a1a, #151515);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #66BB6A);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .completion-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .completion-stat {
+            text-align: center;
+            padding: 16px;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .completion-stat.completed {
+            border: 1px solid #4CAF50;
+        }
+
+        .completion-stat.incomplete {
+            border: 1px solid #f44336;
+        }
+
+        .completion-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .completion-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .time-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .time-label {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .time-value {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .country-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .country-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .country-item:last-child {
+            border-bottom: none;
+        }
+
+        .country-name {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .country-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .question-item {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .question-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .question-id {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .question-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .answer-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .answer-stat {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            background: #1a1a1a;
+            border-radius: 6px;
+        }
+
+        .answer-stat.correct {
+            border: 1px solid #4CAF50;
+        }
+
+        .answer-stat.incorrect {
+            border: 1px solid #f44336;
+        }
+
+        .answer-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .answer-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pct-label {
+            font-size: 13px;
+            color: #888;
+            text-align: right;
+            margin-bottom: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 1px solid #3a3a3a;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+        }
+
+        .clear-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 160px;
+            background: linear-gradient(145deg, #2a1a1a, #1a1010);
+            border: 1px solid #4a2a2a;
+            color: #f44336;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: linear-gradient(145deg, #3a2020, #2a1515);
+            transform: translateY(-2px);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a4a4a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid">
+            <!-- Total Participants -->
+            <div class="card">
+                <h2>Total Participants</h2>
+                <div class="stat-value" id="totalParticipants">0</div>
+                <div class="stat-label">Unique sessions</div>
+            </div>
+
+            <!-- Completion Rate -->
+            <div class="card">
+                <h2>Completion Rate</h2>
+                <div class="stat-value" id="completionRate">0%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="completionProgress" style="width: 0%"></div>
+                </div>
+                <div class="completion-breakdown">
+                    <div class="completion-stat completed">
+                        <div class="completion-value" id="completedCount">0</div>
+                        <div class="completion-label">Completed</div>
+                    </div>
+                    <div class="completion-stat incomplete">
+                        <div class="completion-value" id="incompleteCount">0</div>
+                        <div class="completion-label">Incomplete</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission Duration -->
+            <div class="card">
+                <h2>Mission Duration</h2>
+                <div class="time-stat">
+                    <span class="time-label">Average</span>
+                    <span class="time-value" id="avgTime">--</span>
+                </div>
+                <div class="time-stat">
+                    <span class="time-label">Median</span>
+                    <span class="time-value" id="medianTime">--</span>
+                </div>
+                <div class="time-stat">
+                    <span class="time-label">Fastest</span>
+                    <span class="time-value" id="minTime">--</span>
+                </div>
+                <div class="time-stat">
+                    <span class="time-label">Longest</span>
+                    <span class="time-value" id="maxTime">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countries -->
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>Participants by Country</h2>
+            <div class="country-list" id="countryList">
+                <div class="loading">No data yet</div>
+            </div>
+        </div>
+
+        <!-- Question Performance -->
+        <div class="card">
+            <h2>Question Performance</h2>
+            <div id="questionStats">
+                <div class="loading">No data yet</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="clear-btn" onclick="clearData()">Clear Data</button>
+    <button class="refresh-btn" onclick="loadAnalytics()">Refresh</button>
+
+    <script>
+        const ANALYTICS_KEY = 'issdc_analytics_data';
+
+        const questionLabels = {
+            'U2-Q1': "Tuckman's model — which stage involves the most conflict?",
+            'U2-Q2': "Tuckman's model — highest level of productivity?",
+            'U2-Q3': "Final stage in Tuckman's five-stage model?",
+            'U4-Q1': "Primary benefit of establishing clear team norms early?",
+            'U4-Q2': "T/F: Psychological safety is critical for team effectiveness",
+            'U6-Q1': "What does 'consensus' actually mean in team decision-making?",
+            'U6-Q2': "Most important factor for successful business decisions?",
+            'U8-Q1': "Research on conducting team debriefs?",
+            'U8-Q2': "Diverse teams outperform homogeneous teams by what %?",
+            'U8-Q3': "T/F: Collective strengths build trust & collaboration",
+            'U10-Q1': "Cross-cultural training for international teams?",
+            'U10-Q2': "Visual tools reduce misunderstandings by what %?",
+            'U12-Q1': "T/F: Cultural metacognition involves recognizing cultural variations",
+            'U12-Q2': "Erin Meyer's Culture Map — egalitarian vs hierarchical leadership?",
+            'U14-Q1': "NVC framework — correct sequence of four components?",
+            'U14-Q2': "T/F: Microsoft CEO gave executives a book on NVC",
+            'U16-Q1': "Cognitive load theory — most effective way to present complex info?",
+            'U16-Q2': "Assertion-evidence model increased retention by what %?",
+            'U18-Q1': "T/F: Same info in text + narration simultaneously improves learning",
+            'U18-Q2': "Recommended minimum font size for slides?",
+            'U18-Q3': "Recommended approach for color and contrast on slides?",
+            'U18-Q4': "How much text should appear on a single slide?",
+            'U20-Q1': "Most effective technique for visual hierarchy on slides?",
+            'U20-Q2': "Best practice for data visualizations in presentations?",
+            'U20-Q3': "Recommended approach for choosing slide colors?"
+        };
+
+        function getAnalyticsStore() {
+            try {
+                const d = localStorage.getItem(ANALYTICS_KEY);
+                return d ? JSON.parse(d) : { sessions: [], questions: {} };
+            } catch(e) { return { sessions: [], questions: {} }; }
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || seconds === 0) return '--';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}m ${secs}s`;
+        }
+
+        function calculateMedian(values) {
+            if (values.length === 0) return 0;
+            const sorted = [...values].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 === 0
+                ? (sorted[mid - 1] + sorted[mid]) / 2
+                : sorted[mid];
+        }
+
+        function loadAnalytics() {
+            const data = getAnalyticsStore();
+            const sessions = data.sessions || [];
+            const questions = data.questions || {};
+
+            // Total participants
+            document.getElementById('totalParticipants').textContent = sessions.length;
+
+            // Completion stats
+            const completed = sessions.filter(s => s.completed).length;
+            const incomplete = sessions.length - completed;
+            const completionRate = sessions.length > 0 ? Math.round((completed / sessions.length) * 100) : 0;
+
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+            document.getElementById('completionProgress').style.width = `${completionRate}%`;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('incompleteCount').textContent = incomplete;
+
+            // Time statistics (only completed sessions with duration)
+            const completedTimes = sessions.filter(s => s.completed && s.duration).map(s => s.duration);
+            if (completedTimes.length > 0) {
+                const avg = Math.round(completedTimes.reduce((a, b) => a + b, 0) / completedTimes.length);
+                document.getElementById('avgTime').textContent = formatTime(avg);
+                document.getElementById('medianTime').textContent = formatTime(calculateMedian(completedTimes));
+                document.getElementById('minTime').textContent = formatTime(Math.min(...completedTimes));
+                document.getElementById('maxTime').textContent = formatTime(Math.max(...completedTimes));
+            } else {
+                ['avgTime','medianTime','minTime','maxTime'].forEach(id =>
+                    document.getElementById(id).textContent = '--');
+            }
+
+            // Country breakdown
+            const countryCounts = {};
+            sessions.forEach(s => {
+                const c = s.country || 'Unknown';
+                countryCounts[c] = (countryCounts[c] || 0) + 1;
+            });
+            const sortedCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]);
+            document.getElementById('countryList').innerHTML = sortedCountries.length > 0
+                ? sortedCountries.map(([country, count]) => `
+                    <div class="country-item">
+                        <span class="country-name">${country}</span>
+                        <span class="country-count">${count}</span>
+                    </div>`).join('')
+                : '<div class="loading">No data yet</div>';
+
+            // Question performance
+            const qKeys = Object.keys(questions);
+            if (qKeys.length > 0) {
+                // Sort by unit then question number
+                qKeys.sort((a, b) => {
+                    const [aU, aQ] = a.replace('U','').replace('Q','').split('-').map(Number);
+                    const [bU, bQ] = b.replace('U','').replace('Q','').split('-').map(Number);
+                    return aU !== bU ? aU - bU : aQ - bQ;
+                });
+
+                document.getElementById('questionStats').innerHTML = qKeys.map(qId => {
+                    const stats = questions[qId];
+                    const total = stats.correct + stats.incorrect;
+                    const pct = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
+                    const label = questionLabels[qId] || qId;
+
+                    return `
+                        <div class="question-item">
+                            <div class="question-id">${qId}</div>
+                            <div class="question-text">${label}</div>
+                            <div class="pct-label">${pct}% correct</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${pct}%"></div>
+                            </div>
+                            <div class="answer-stats">
+                                <div class="answer-stat correct">
+                                    <div class="answer-stat-value" style="color: #4CAF50;">${stats.correct}</div>
+                                    <div class="answer-stat-label">Correct</div>
+                                </div>
+                                <div class="answer-stat incorrect">
+                                    <div class="answer-stat-value" style="color: #f44336;">${stats.incorrect}</div>
+                                    <div class="answer-stat-label">Incorrect</div>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+            } else {
+                document.getElementById('questionStats').innerHTML = '<div class="loading">No data yet</div>';
+            }
+        }
+
+        function clearData() {
+            if (confirm('Clear all analytics data? This cannot be undone.')) {
+                localStorage.removeItem(ANALYTICS_KEY);
+                loadAnalytics();
+            }
+        }
+
+        loadAnalytics();
+        setInterval(loadAnalytics, 30000);
+    </script>
+</body>
+</html>
